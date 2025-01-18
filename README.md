@@ -8,3 +8,5 @@
 4. Commit and Push Origin to create a pull request on GitHub 
 5. Merge to main branch
 6. For other branches, on Github desktop -> Branch -> Merge into current branch to merge main into your branch
+
+bruh
