@@ -39,7 +39,8 @@ app.post('/user/login', function (req, res) {//Login
 		}
 	});
 });
-
+// Identification and Authentication Vuln (No hashing):1 (Add hash + salt to password)
+// Identification and Authentication Vuln (Permits weak/default passwords):2 (Add Regex to password)
 app.post('/user', function (req, res) {//Create User
 	var username = req.body.username;
 	var email = req.body.email;
@@ -86,6 +87,7 @@ app.put('/user/update/', verifyToken, function (req, res) {//Update user info
 });
 
 //Listing APIs
+// Injection Vuln(XSS):1
 app.post('/listing/', verifyToken, function (req, res) {//Add Listing
 	var title = req.body.title;
 	var category = req.body.category;
@@ -119,7 +121,7 @@ app.get('/user/listing', verifyToken, function (req, res) {//Get all Listings of
 		}
 	});
 });
-
+// Broken Access Control Vuln (Viewing listings without authentication):1
 app.get('/listing/:id', function (req, res) {//View a listing
 	var id = req.params.id
 	listing.getListing(id, function (err, result) {
@@ -133,7 +135,7 @@ app.get('/listing/:id', function (req, res) {//View a listing
 		}
 	});
 });
-
+// Injection Vuln (SQLi):1
 app.get('/search/:query', verifyToken, function (req, res) {//View all other user's listing that matches the search
 	var query = req.params.query;
 	var userid = req.id;
@@ -148,7 +150,7 @@ app.get('/search/:query', verifyToken, function (req, res) {//View all other use
 		}
 	});
 });
-
+// Broken Access Control Vuln(User can edit other user's listing):2
 app.put('/listing/update/', function (req, res) {//View a listing
 	var title = req.body.title;
 	var category = req.body.category;
