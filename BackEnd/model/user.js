@@ -1,6 +1,7 @@
 var db = require('./databaseConfig.js');
-var config = require('../config.js');
 var jwt = require('jsonwebtoken');
+// Store the JWT_SECRET_KEY in the .env file
+require('dotenv').config();
 
 var userDB = {
 
@@ -25,12 +26,25 @@ var userDB = {
 						return callback(err, null, null);
 
 					} else {
+                        // Generate token code done here
 						var token = "";
 
+                        var JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+                        var JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
+                        var JWT_ALGORITHM = process.env.JWT_ALGORITHM;
+
 						if (result.length == 1) {
-							token = jwt.sign({ id: result[0].id }, config.key, {
-								expiresIn: 86400 //expires in 24 hrs
-							});
+                            user_id = result[0].id;
+
+							token = jwt.sign(
+                                { id: user_id }, // Payload
+                                JWT_SECRET_KEY,  // Secret key
+                                {
+                                    expiresIn: JWT_EXPIRES_IN,
+                                    algorithm: JWT_ALGORITHM,
+                                }
+                            );
+                            console.log(user_id); // Verify the user_id logged in
 							console.log("@@token " + token);
 							return callback(null, token, result);
 						} //if(res)

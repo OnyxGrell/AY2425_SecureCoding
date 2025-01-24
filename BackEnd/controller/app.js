@@ -122,7 +122,21 @@ app.get('/user/listing', verifyToken, function (req, res) {//Get all Listings of
 	});
 });
 // Broken Access Control Vuln (Viewing listings without authentication):1
-app.get('/listing/:id', function (req, res) {//View a listing
+// app.get('/listing/:id', function (req, res) {//View a listing
+// 	var id = req.params.id
+// 	listing.getListing(id, function (err, result) {
+// 		if (err) {
+// 			res.status(500);
+// 			res.json({ success: false })
+// 		} else {
+// 			res.status(200);
+// 			res.setHeader('Content-Type', 'application/json');
+// 			res.json({ success: true, result: result })
+// 		}
+// 	});
+// });
+// Broken Access Control Vuln (Viewing listings without authentication):1 - Patched
+app.get('/listing/:id', verifyToken, function (req, res) {//View a listing
 	var id = req.params.id
 	listing.getListing(id, function (err, result) {
 		if (err) {
@@ -135,6 +149,7 @@ app.get('/listing/:id', function (req, res) {//View a listing
 		}
 	});
 });
+
 // Injection Vuln (SQLi):1
 app.get('/search/:query', verifyToken, function (req, res) {//View all other user's listing that matches the search
 	var query = req.params.query;
