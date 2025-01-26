@@ -140,9 +140,11 @@ app.get('/listing/:id', verifyToken, function (req, res) {//View a listing
 	var id = req.params.id
 	listing.getListing(id, function (err, result) {
 		if (err) {
+            console.log('failed')
 			res.status(500);
 			res.json({ success: false })
 		} else {
+            console.log('success')
 			res.status(200);
 			res.setHeader('Content-Type', 'application/json');
 			res.json({ success: true, result: result })
@@ -166,7 +168,7 @@ app.get('/search/:query', verifyToken, function (req, res) {//View all other use
 	});
 });
 // Broken Access Control Vuln(User can edit other user's listing):2
-app.put('/listing/update/', function (req, res) {//View a listing
+app.put('/listing/update/', verifyToken, function (req, res) {//View a listing
 	var title = req.body.title;
 	var category = req.body.category;
 	var description = req.body.description;

@@ -26,17 +26,19 @@ var userDB = {
 						return callback(err, null, null);
 
 					} else {
-                        // Generate token code done here
-						var token = "";
-
+                        var token = "";
                         var JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
                         var JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
                         var JWT_ALGORITHM = process.env.JWT_ALGORITHM;
 
-						if (result.length == 1) {
+                        console.log("JWT_SECRET_KEY:", JWT_SECRET_KEY); // Log the secret key
+                        console.log("JWT_EXPIRES_IN:", JWT_EXPIRES_IN); // Log the expiration time
+                        console.log("JWT_ALGORITHM:", JWT_ALGORITHM); // Log the algorithm
+
+                        if (result.length == 1) {
                             user_id = result[0].id;
 
-							token = jwt.sign(
+                            token = jwt.sign(
                                 { id: user_id }, // Payload
                                 JWT_SECRET_KEY,  // Secret key
                                 {
@@ -45,16 +47,15 @@ var userDB = {
                                 }
                             );
                             console.log(user_id); // Verify the user_id logged in
-							console.log("@@token " + token);
-							return callback(null, token, result);
-						} //if(res)
-						else {
-							console.log("email/password does not match");
-							var err2 = new Error("Email/Password does not match.");
-							err2.statusCode = 404;
-							console.log(err2);
-							return callback(err2, null, null);
-						}
+                            console.log("@@token " + token);
+                            return callback(null, token, result);
+                        } else {
+                            console.log("email/password does not match");
+                            var err2 = new Error("Email/Password does not match.");
+                            err2.statusCode = 404;
+                            console.log(err2);
+                            return callback(err2, null, null);
+                        }
 					}  //else
 				});
 			}

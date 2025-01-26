@@ -6,8 +6,10 @@ const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 function verifyToken(req, res, next) {
     const authHeader = req.headers['authorization']; // Retrieve the Authorization header
 
+    console.log("Authorization Header:", authHeader); // Log the Authorization header
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        // Return 403 if the token is missing or improperly formatted
+        console.log('Token missing or improperly formatted'); // Log missing or improperly formatted token
         return res.status(403).json({ auth: false, message: 'Not authorized! Token missing or invalid.' });
     }
 
@@ -15,10 +17,11 @@ function verifyToken(req, res, next) {
 
     jwt.verify(token, JWT_SECRET_KEY, (err, decoded) => {
         if (err) {
-            // Return 403 if the token is invalid or expired
+            console.log('Invalid or expired token'); // Log invalid or expired token
             return res.status(403).json({ auth: false, message: 'Not authorized! Invalid or expired token.' });
         }
 
+        console.log('Token verified, user ID:', decoded.id); // Log successful token verification
         req.id = decoded.id; // Attach the decoded user ID to the request object
         next(); // Proceed to the next middleware or route handler
     });
