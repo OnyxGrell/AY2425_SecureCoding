@@ -10,6 +10,7 @@
 6. For other branches, on Github desktop -> Branch -> Merge into current branch to merge main into your branch
 
 # Setting up .env
+Set up the .env file in the /Backend directory
 JWT_SECRET_KEY=""
 JWT_EXPIRES_IN=1m || Any duration
 JWT_ALGORITHM=HS256 || Any algorithm
