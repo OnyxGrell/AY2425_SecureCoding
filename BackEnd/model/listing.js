@@ -69,6 +69,8 @@ var listingDB = {
 
         })
     },
+    //Search field vulnerability
+    //DONE
     getOtherUsersListings: function (query, userid, callback) {
         var conn = db.getConnection();
         conn.connect(function (err) {
@@ -76,7 +78,11 @@ var listingDB = {
                 console.log(err);
                 return callback(err, null);
             } else {
-                var sql = "select l.title,l.category,l.price,l.id,i.name from listings l,images i where l.id = i.fk_product_id and l.fk_poster_id != ? and l.title like '%" + query + "%'";
+                //Old SQL statement
+                //var sql = "select l.title,l.category,l.price,l.id,i.name from listings l,images i where l.id = i.fk_product_id and l.fk_poster_id != ? and l.title like '%" + query + "%'";
+                
+                //New SQL statement
+                var sql = "select l.title,l.category,l.price,l.id,i.name from listings l,images i where l.id = i.fk_product_id and l.fk_poster_id != ? and l.title LIKE ?"; //Replaced the '%" + query + "%' with ?
                 conn.query(sql, [userid], function (err, result) {
                     conn.end()
                     if (err) {
