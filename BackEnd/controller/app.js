@@ -175,14 +175,13 @@ app.get('/search/:query', verifyToken, function (req, res) {//View all other use
 	});
 });
 // Broken Access Control Vuln(User can edit other user's listing):2
-// (Detailed)
-app.put('/listing/update/', verifyToken,verifyUser.userAuth, function (req, res) {//View a listing
+// (Detailed) -- Done
+app.put('/listing/update/', verifyToken,verifyUser.userAuth, function (req, res) {//Update a listing
 	var title = req.body.title;
 	var category = req.body.category;
 	var description = req.body.description;
 	var price = req.body.price;
 	var id = req.body.id;
-	res.locals.listingId = id; // for validation in us
 
 	listing.updateListing(title, category, description, price, id, function (err, result) {
 		if (err) {
