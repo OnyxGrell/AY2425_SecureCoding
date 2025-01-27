@@ -9,6 +9,7 @@ var offers = require('../model/offer');
 var likes = require('../model/likes');
 var images = require('../model/images')
 var verifyToken = require('../auth/verifyToken.js');
+var verifyUser = require('../auth/userAuth.js');
 
 var path = require("path");
 var multer = require('multer')
@@ -40,7 +41,10 @@ app.post('/user/login', function (req, res) {//Login
 	});
 });
 // Identification and Authentication Vuln (No hashing):1 (Add hash + salt to password)
+// (Detailed)
 // Identification and Authentication Vuln (Permits weak/default passwords):2 (Add Regex to password)
+// (Brief)
+
 app.post('/user', function (req, res) {//Create User
 	var username = req.body.username;
 	var email = req.body.email;
@@ -88,6 +92,7 @@ app.put('/user/update/', verifyToken, function (req, res) {//Update user info
 
 //Listing APIs
 // Injection Vuln(XSS):1
+// (Brief)
 app.post('/listing/', verifyToken, function (req, res) {//Add Listing
 	var title = req.body.title;
 	var category = req.body.category;
@@ -135,6 +140,7 @@ app.get('/user/listing', verifyToken, function (req, res) {//Get all Listings of
 // 		}
 // 	});
 // });
+
 // Broken Access Control Vuln (Viewing listings without authentication):1 - Patched
 app.get('/listing/:id', verifyToken, function (req, res) {//View a listing
 	var id = req.params.id
@@ -153,6 +159,7 @@ app.get('/listing/:id', verifyToken, function (req, res) {//View a listing
 });
 
 // Injection Vuln (SQLi):1
+// (Detailed)
 app.get('/search/:query', verifyToken, function (req, res) {//View all other user's listing that matches the search
 	var query = req.params.query;
 	var userid = req.id;
@@ -168,12 +175,15 @@ app.get('/search/:query', verifyToken, function (req, res) {//View all other use
 	});
 });
 // Broken Access Control Vuln(User can edit other user's listing):2
-app.put('/listing/update/', verifyToken, function (req, res) {//View a listing
+// (Detailed)
+app.put('/listing/update/', verifyToken,verifyUser.userAuth, function (req, res) {//View a listing
 	var title = req.body.title;
 	var category = req.body.category;
 	var description = req.body.description;
 	var price = req.body.price;
 	var id = req.body.id;
+	res.locals.listingId = id; // for validation in us
+
 	listing.updateListing(title, category, description, price, id, function (err, result) {
 		if (err) {
 			res.status(500);

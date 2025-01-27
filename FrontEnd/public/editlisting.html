@@ -25,6 +25,7 @@
 
 
         $.ajax({
+            headers: { "authorization": "Bearer " + token },
             url: "http://localhost:8081/listing/" + `${listingid}`,//supply the api url
             type: "GET",///supply the method
             contentType: "application/json",//standard
@@ -60,6 +61,7 @@
 
             var data = `{"title":"${title}","category":"${category}","description":"${description}","price":${price},"id":${listingid}}`
             $.ajax({
+                headers: { "authorization": "Bearer " + token },
                 url: "http://localhost:8081/listing/update/",//supply the api url
                 type: "PUT",///supply the method
                 data: data,//supply the data to the back-end(like PostMAN body but sending it in raw json format)
@@ -83,6 +85,7 @@
         $('#delete').click(function () {
             var data = `{"id":${listingid}}`
             $.ajax({
+                headers: { "authorization": "Bearer " + token },
                 url: "http://localhost:8081/listing/delete/",//supply the api url
                 type: "DELETE",///supply the method
                 data: data,//supply the data to the back-end(like PostMAN body but sending it in raw json format)
