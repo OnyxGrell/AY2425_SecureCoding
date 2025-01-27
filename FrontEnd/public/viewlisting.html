@@ -35,6 +35,7 @@ $(document).ready(function () {
     }
 
     $.ajax({
+        headers: { "authorization": "Bearer " + token },
         url: "http://localhost:8081/listing/" + listingid + "/", // Supply the API URL
         type: "GET", // Supply the method
         headers: { "Authorization": "Bearer " + token }, // Include the token in the Authorization header
@@ -97,6 +98,7 @@ $(document).ready(function () {
                 $('#listing').html(postsHtml);
 
                 $.ajax({
+                    headers: { "authorization": "Bearer " + token },
                     url: "http://localhost:8081/likes/" + listingid + "/", // Supply the API URL
                     type: "GET", // Supply the method
                     contentType: "application/json", // Standard
@@ -172,6 +174,7 @@ $(document).ready(function () {
     });
     $('#logout').click(function () {
         $.ajax({
+            headers: { "authorization": "Bearer " + token },
             url: "http://localhost:8081/user/logout", // Supply the API URL
             type: "POST", // Supply the method
             contentType: "application/json", // Standard

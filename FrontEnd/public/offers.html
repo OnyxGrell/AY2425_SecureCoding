@@ -82,6 +82,7 @@
             var status = urlParams.get("status");
             var data = `{"status":"${status}","offerid":${offerid}}`
             $.ajax({
+                headers: { "authorization": "Bearer " + token },
                 url: "http://localhost:8081/offer/decision/",//supply the api url
                 type: "POST",///supply the method
                 data: data,//supply the data to the back-end(like PostMAN body but sending it in raw json format)
@@ -102,6 +103,7 @@
         }
         $('#logout').click(function () {
             $.ajax({
+                headers: { "authorization": "Bearer " + token },
                 url: "http://localhost:8081/user/logout",//supply the api url
                 type: "POST",///supply the method
                 contentType: "application/json",//standard
