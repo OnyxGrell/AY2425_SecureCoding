@@ -3,8 +3,9 @@
 var db = require('./databaseConfig.js');
 
 var listingDB = {
-    addListing: function (title, category, description, price, fk_poster_id, callback) {
-        console.log(description);
+
+    addListing: function (data, callback) {
+        console.log(data.description);
         var conn = db.getConnection();
 
         conn.connect(function (err) {
@@ -14,7 +15,7 @@ var listingDB = {
             }
             else {
                 var sql = 'insert into listings(title,category,description,price,fk_poster_id) values(?,?,?,?,?)';
-                conn.query(sql, [title, category, description, price, fk_poster_id], function (err, result) {
+                conn.query(sql, [data.title, data.category, data.description, data.price, data.fk_poster_id], function (err, result) {
                     conn.end();
                     if (err) {
                         console.log("Err: " + err);
@@ -80,7 +81,7 @@ var listingDB = {
             } else {
                 //Old SQL statement
                 //var sql = "select l.title,l.category,l.price,l.id,i.name from listings l,images i where l.id = i.fk_product_id and l.fk_poster_id != ? and l.title like '%" + query + "%'";
-                
+
                 //New SQL statement
                 var sql = "select l.title,l.category,l.price,l.id,i.name from listings l,images i where l.id = i.fk_product_id and l.fk_poster_id != ? and l.title LIKE ?"; //Replaced the '%" + query + "%' with ?
                 conn.query(sql, [userid], function (err, result) {
