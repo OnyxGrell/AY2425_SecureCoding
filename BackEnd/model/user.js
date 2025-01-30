@@ -89,7 +89,7 @@ var userDB = {
 		})
 	},
 
-	addUser: function (username, email, password, profile_pic_url, role, callback) {
+	addUser: function (username, email, hashedPassword, firstname, lastname, callback) {
 
 		var conn = db.getConnection();
 
@@ -101,8 +101,8 @@ var userDB = {
 
 
 				console.log("Connected!");
-				var sql = "Insert into users(username,email,password,profile_pic_url,role) values(?,?,?,?,?)";
-				conn.query(sql, [username, email, password, profile_pic_url, role], function (err, result) {
+				var sql = "Insert into users(username,email,password,firstname,lastname) values(?,?,?,?,?)";
+				conn.query(sql, [username, email, hashedPassword,firstname,lastname], function (err, result) {
 					conn.end();
 
 					if (err) {
