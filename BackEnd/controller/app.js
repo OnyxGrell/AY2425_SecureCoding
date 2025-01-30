@@ -10,6 +10,7 @@ var likes = require('../model/likes');
 var images = require('../model/images')
 var verifyToken = require('../auth/verifyToken.js');
 var verifyUser = require('../auth/userAuth.js');
+const bcryptMiddleware = require('../middleware/bcryptMiddleware.js');
 
 var path = require("path");
 var multer = require('multer')
@@ -24,9 +25,9 @@ app.use(bodyParser.json());
 app.use(urlencodedParser);
 
 //User APIs
-app.post('/user/login', function (req, res) {//Login
+app.post('/user/login', verifyUser.loginUser, bcryptMiddleware.checkIfHashed, bcryptMiddleware.comparePassword, function (req, res) {//Login
 	var email = req.body.email;
-	var password = req.body.password;
+	var password = res.locals.hash;
 
 	user.loginUser(email, password, function (err, token, result) {
 		if (err) {
@@ -45,14 +46,14 @@ app.post('/user/login', function (req, res) {//Login
 // Identification and Authentication Vuln (Permits weak/default passwords):2 (Add Regex to password)
 // (Brief)
 
-app.post('/user', function (req, res) {//Create User
+app.post('/user', bcryptMiddleware.hashPassword, function (req, res) {//Create User
 	var username = req.body.username;
 	var email = req.body.email;
-	var password = req.body.password;
-	var profile_pic_url = req.body.profile_pic_url
-	var role = req.body.role
+	var hashedPassword = res.locals.hash;
+    var firstname = req.body.firstname;
+    var lastname = req.body.lastname;
 
-	user.addUser(username, email, password, profile_pic_url, role, function (err, result) {
+	user.addUser(username, email, hashedPassword, firstname, lastname, function (err, result) {
 		if (err) {
 			res.status(500);
 			res.send(err);
