@@ -87,3 +87,16 @@ module.exports.checkIfHashed = (req, res, next) => {
         next();
     };
 };
+
+// Middleware function for validating password strength
+module.exports.validatePassword = (req, res, next) => {
+    const password = req.body.password;
+    const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
+
+    if (!passwordRegex.test(password)) {
+        return res.status(400).json({
+            message: "Password must be between 6 to 16 characters long and contain at least one number and one special character",
+        });
+    }
+    next();
+};

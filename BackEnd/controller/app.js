@@ -46,7 +46,7 @@ app.post('/user/login', verifyUser.loginUser, bcryptMiddleware.checkIfHashed, bc
 // Identification and Authentication Vuln (Permits weak/default passwords):2 (Add Regex to password)
 // (Brief)
 
-app.post('/user', bcryptMiddleware.hashPassword, function (req, res) {//Create User
+app.post('/user', bcryptMiddleware.validatePassword, bcryptMiddleware.hashPassword, function (req, res) {//Create User
 	var username = req.body.username;
 	var email = req.body.email;
 	var hashedPassword = res.locals.hash;
