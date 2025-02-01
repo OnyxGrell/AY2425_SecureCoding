@@ -1,16 +1,31 @@
+const express = require('express');
+const fs = require('fs');
+const https = require('https');
+const serveStatic = require('serve-static');
+const path = require('path');
+const cors = require('cors');
+const app = require('./controller/app'); 
 
+// Serve static files
+app.use(serveStatic(path.join(__dirname, 'public')));
 
-var express = require('express');
-var serveStatic = require('serve-static');
-var app = require('./controller/app.js');
+privateKey = fs.readFileSync(path.join(__dirname, '../cert/key.pem'), 'utf8');
+certificate = fs.readFileSync(path.join(__dirname, '../cert/cert.pem'), 'utf8');
 
-var port = 8081;
+const credentials = { key: privateKey, cert: certificate };
 
-app.use(serveStatic(__dirname + '/public')); 
+// Define ports
+const httpsPort = 8081;
 
-var server = app.listen(port, function(){
-    console.log('Web App Hosted at http://localhost:%s', port);
+// Create HTTPS servers
+const httpsServer = https.createServer(credentials, app);
+
+httpsServer.listen(httpsPort, () => {
+    console.log(`Backend HTTPS Server running at https://localhost:${httpsPort}`);
 });
 
-var app = require('./controller/app.js');
+// Add a simple route for testing
+app.get('/test', (req, res) => {
+    res.send('Server is working!');
+});
 

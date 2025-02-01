@@ -24,21 +24,21 @@
         $('#lastname').html(lastname);
 
         $('#updateinfo').click(function () {
-            window.location.assign("http://localhost:3001/updateprofile.html")
+            window.location.assign("https://localhost:3001/updateprofile.html")
         });
         
 
         $('#logout').click(function () {
             $.ajax({
                 headers: { "authorization": "Bearer " + token },
-                url: "http://localhost:8081/user/logout",//supply the api url
+                url: "https://localhost:8081/user/logout",//supply the api url
                 type: "POST",///supply the method
                 contentType: "application/json",//standard
                 dataType: "json",
                 success: function (data, textStatus, xhr) {//retrieve some data back from server
                     console.log(data)
                     window.localStorage.clear()
-                    window.location.assign("http://localhost:3001/loginPage.html")
+                    window.location.assign("https://localhost:3001/loginPage.html")
                 }, error(xhr, textStatus, err) {
                     console.log(err)
                     console.log("Error")
@@ -49,7 +49,7 @@
 
         $('#searchbutton').click(function () {
             var search = $('#search').val()
-            window.location.assign("http://localhost:3001/searchlistings.html?search=" + `${search}`)
+            window.location.assign("https://localhost:3001/searchlistings.html?search=" + `${search}`)
         });
     });
 </script>
