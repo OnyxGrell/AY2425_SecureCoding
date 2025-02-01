@@ -104,10 +104,19 @@ app.post('/listing/', verifyToken, function (req, res) {//Add Listing
 		fk_poster_id : req.id	
 	}
 
-	// Regex expression to prevent XSS on known fields (title)
-	data.title = data.title.replace(/[^a-zA-Z0-9.,\s]/g, ''); //Only allows alphabets, numbers, commas, dots, and spaces
-	//.replace(/<|>|"|\'|`|;|\(|\)|\{|}|\[|\]|\|\|\|%|\?|script|scrip|cript/gi, ''); //Blacklist common XSS characters and keywords
-	data.title = data.title.replace(/alert|script|scrip|cript|onload|onerror|eval|document|window\b/gi, '');//Blacklist common XSS characters and keywords
+    // Regex expression to prevent XSS on known fields
+    const xssRegex = /<|>|"|\'|`|;|\(|\)|\{|\}|\[|\]|\||%|\?|script|scrip|cript|alert|onload|onerror|eval|document|window\b/gi;
+
+    // Validate input fields for XSS
+    if (xssRegex.test(data.title) || xssRegex.test(data.category) || xssRegex.test(data.description) || xssRegex.test(data.price)) {
+        return res.status(400).json({ success: false, message: 'Invalid characters in input fields' });
+    }
+
+    // Sanitize input fields by whitelisting allowed characters
+    data.title = data.title.replace(/[^a-zA-Z0-9.,\s]/g, ''); // Only allows alphabets, numbers, commas, dots, and spaces
+    data.category = data.category.replace(/[^a-zA-Z0-9.,\s]/g, ''); // Only allows alphabets, numbers, commas, dots, and spaces
+    data.description = data.description.replace(/[^a-zA-Z0-9.,\s]/g, ''); // Only allows alphabets, numbers, commas, dots, and spaces
+    data.price = data.price.replace(/[^0-9.]/g, ''); // Only allows numbers and dots
 
 	listing.addListing(data, function (err, result) {
 		if (err) {
