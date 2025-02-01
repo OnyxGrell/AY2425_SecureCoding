@@ -166,8 +166,10 @@ app.get('/listing/:id', verifyToken, function (req, res) {//View a listing
 // Injection Vuln (SQLi):1 - patched
 // (Detailed)
 app.get('/search/:query', verifyToken, function (req, res) {//View all other user's listing that matches the search
+
 	var query = req.params.query;
 	var userid = req.id;
+    
 	listing.getOtherUsersListings(query, userid, function (err, result) {
 		if (err) {
 			res.status(500);

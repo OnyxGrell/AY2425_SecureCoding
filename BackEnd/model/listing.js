@@ -79,12 +79,11 @@ var listingDB = {
                 console.log(err);
                 return callback(err, null);
             } else {
-                //Old SQL statement
-                //var sql = "select l.title,l.category,l.price,l.id,i.name from listings l,images i where l.id = i.fk_product_id and l.fk_poster_id != ? and l.title like '%" + query + "%'";
-
-                //New SQL statement
-                var sql = "select l.title,l.category,l.price,l.id,i.name from listings l,images i where l.id = i.fk_product_id and l.fk_poster_id != ? and l.title LIKE ?"; //Replaced the '%" + query + "%' with ?
-                conn.query(sql, [userid], function (err, result) {
+                // 1.title means like table 1 (images)
+                var sql = "SELECT l.title, l.category, l.price, l.id, i.name FROM listings l, images i WHERE l.id = i.fk_product_id AND l.fk_poster_id != ? AND l.title LIKE ?";
+                var queryParam = '%' + query + '%'; // Prepare the query parameter for LIKE clause
+            
+                conn.query(sql, [userid, queryParam], function (err, result) {
                     conn.end()
                     if (err) {
                         console.log(err);
