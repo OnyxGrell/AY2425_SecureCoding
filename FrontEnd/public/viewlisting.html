@@ -168,8 +168,8 @@ $(document).ready(function () {
             }
         }, error(xhr, textStatus, err) {
             console.log(err)
-            if (xhr.status === 403) {
-                // If backend returns a 403 status code, it means the token is invalid or expired or the user is not logged in
+            if (xhr.status === 401) {
+                // If backend returns a 401 status code, it means the token is invalid or expired or the user is not logged in
                 window.alert("Please log in before attempting to use the application");
                 window.location.href = 'loginpage.html'; 
             } else {

@@ -76,7 +76,14 @@
                     }
                 }, error(xhr, textStatus, err) {
                     console.log(err)
-                    window.alert("Error")
+                    // Error 401 is unauthorized
+                    if (xhr.status == 401) {
+                        wubdow.alert("Unauthorized Session, Please Login Again");
+                        window.location.assign("https://localhost:3001/loginPage.html");
+                    } else if (xhr.status == 403) {
+                        window.alert("Forbidden Access to Resource");
+                        window.location.assign("https://localhost:3001/listings.html");
+                    }
                 }
             });
             return false;

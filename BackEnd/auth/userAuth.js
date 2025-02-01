@@ -7,7 +7,7 @@ module.exports.userAuth= (req, res, next) => {
         listingId: req.body.id // Listing Id from request
     };
     
-    console.log(data); // Log Ids into console for validation
+    console.log(data);
 
     const callback = (error,results,fields) => {
         if(error){ // SQL server error
