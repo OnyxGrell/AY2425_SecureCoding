@@ -104,10 +104,19 @@ app.post('/listing/', verifyToken, function (req, res) {//Add Listing
 		fk_poster_id : req.id	
 	}
 
-	// Regex expression to prevent XSS on known fields (title)
-	data.title = data.title.replace(/[^a-zA-Z0-9.,\s]/g, ''); //Only allows alphabets, numbers, commas, dots, and spaces
-	//.replace(/<|>|"|\'|`|;|\(|\)|\{|}|\[|\]|\|\|\|%|\?|script|scrip|cript/gi, ''); //Blacklist common XSS characters and keywords
-	data.title = data.title.replace(/alert|script|scrip|cript|onload|onerror|eval|document|window\b/gi, '');//Blacklist common XSS characters and keywords
+    // Regex expression to prevent XSS on known fields
+    const xssRegex = /<|>|"|\'|`|;|\(|\)|\{|\}|\[|\]|\||%|\?|script|scrip|cript|alert|onload|onerror|eval|document|window\b/gi;
+
+    // Validate input fields for XSS
+    if (xssRegex.test(data.title) || xssRegex.test(data.category) || xssRegex.test(data.description) || xssRegex.test(data.price)) {
+        return res.status(400).json({ success: false, message: 'Invalid characters in input fields' });
+    }
+
+    // Sanitize input fields by whitelisting allowed characters
+    data.title = data.title.replace(/[^a-zA-Z0-9.,\s]/g, ''); // Only allows alphabets, numbers, commas, dots, and spaces
+    data.category = data.category.replace(/[^a-zA-Z0-9.,\s]/g, ''); // Only allows alphabets, numbers, commas, dots, and spaces
+    data.description = data.description.replace(/[^a-zA-Z0-9.,\s]/g, ''); // Only allows alphabets, numbers, commas, dots, and spaces
+    data.price = data.price.replace(/[^0-9.]/g, ''); // Only allows numbers and dots
 
 	listing.addListing(data, function (err, result) {
 		if (err) {
@@ -136,20 +145,6 @@ app.get('/user/listing', verifyToken, function (req, res) {//Get all Listings of
 		}
 	});
 });
-// Broken Access Control Vuln (Viewing listings without authentication):1
-// app.get('/listing/:id', function (req, res) {//View a listing
-// 	var id = req.params.id
-// 	listing.getListing(id, function (err, result) {
-// 		if (err) {
-// 			res.status(500);
-// 			res.json({ success: false })
-// 		} else {
-// 			res.status(200);
-// 			res.setHeader('Content-Type', 'application/json');
-// 			res.json({ success: true, result: result })
-// 		}
-// 	});
-// });
 
 // Broken Access Control Vuln (Viewing listings without authentication):1 - Patched
 app.get('/listing/:id', verifyToken, function (req, res) {//View a listing
@@ -171,8 +166,10 @@ app.get('/listing/:id', verifyToken, function (req, res) {//View a listing
 // Injection Vuln (SQLi):1 - patched
 // (Detailed)
 app.get('/search/:query', verifyToken, function (req, res) {//View all other user's listing that matches the search
+
 	var query = req.params.query;
 	var userid = req.id;
+    
 	listing.getOtherUsersListings(query, userid, function (err, result) {
 		if (err) {
 			res.status(500);
@@ -186,7 +183,7 @@ app.get('/search/:query', verifyToken, function (req, res) {//View all other use
 });
 // Broken Access Control Vuln(User can edit other user's listing):2
 // (Detailed) -- Done
-app.put('/listing/update/', verifyToken,verifyUser.userAuth, function (req, res) {//Update a listing
+app.put('/listing/update/', verifyToken, verifyUser.userAuth, function (req, res) {//Update a listing
 	var title = req.body.title;
 	var category = req.body.category;
 	var description = req.body.description;

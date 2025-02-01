@@ -55,7 +55,7 @@
                 var data = `{"email":"${email}","password":"${password}"}`
 
                 $.ajax({
-                    url:"http://localhost:8081/user/login",//supply the api url
+                    url:"https://localhost:8081/user/login",//supply the api url
                     type:"POST",///supply the method
                     data:data,//supply the data to the back-end(like PostMAN body but sending it in raw json format)
                     contentType:"application/json",//standard
@@ -66,7 +66,7 @@
                             var token = data.token;
                             localStorage.setItem('token',token);//store at local storage like cache
                             localStorage.setItem('userData',userData)
-                            window.location.assign("http://localhost:3001/listings.html")//redirect the user to the next webpage
+                            window.location.assign("https://localhost:3001/listings.html")//redirect the user to the next webpage
                         }else{
                             window.alert("Wrong Credentials")
                         }

@@ -7,7 +7,7 @@ module.exports.userAuth= (req, res, next) => {
         listingId: req.body.id // Listing Id from request
     };
     
-    console.log(data); // Log Ids into console for validation
+    console.log(data);
 
     const callback = (error,results,fields) => {
         if(error){ // SQL server error
@@ -16,7 +16,7 @@ module.exports.userAuth= (req, res, next) => {
         }else{
             if(results.length == 0){ // No results returned, meaning listing does not belong to user
                 console.log('Listing does not belong to user');
-                return res.status(403).json({message: 'Listing does not belong to user'});
+                res.status(403).json({message: 'Listing does not belong to user'});
             }else{// Listing belongs to user
                 next();
             };
