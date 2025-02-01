@@ -3,7 +3,6 @@ const fs = require('fs');
 const https = require('https');
 const serveStatic = require('serve-static');
 const path = require('path');
-const cors = require('cors');
 const app = require('./controller/app'); 
 
 // Serve static files

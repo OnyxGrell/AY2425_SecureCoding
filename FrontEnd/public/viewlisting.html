@@ -168,7 +168,13 @@ $(document).ready(function () {
             }
         }, error(xhr, textStatus, err) {
             console.log(err)
-            window.alert("Error in retrieving")
+            if (xhr.status === 403) {
+                // If backend returns a 403 status code, it means the token is invalid or expired or the user is not logged in
+                window.alert("Please log in before attempting to use the application");
+                window.location.href = 'loginpage.html'; 
+            } else {
+                window.alert("Error in retrieving")
+            }
         }
 
     });
