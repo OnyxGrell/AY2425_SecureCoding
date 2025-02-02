@@ -19,7 +19,9 @@ var multer = require('multer')
 var cors = require('cors');//Just use(security feature)
 
 var morgan = require('morgan');
+const { auditLogger, errorLogger } = require('../middleware/winstonMiddleware.js'); // Import the loggers
 var rfs = require('rotating-file-stream');
+const { error } = require('console');
 
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
@@ -57,11 +59,6 @@ app.use(morgan(customFormat, {
     skip: function (req, res) { return res.statusCode < 400 },
     stream: errorLogStream
 }));
-
-// Setup morgan to log errors to the console
-app.use(morgan(customFormat, {
-    skip: function (req, res) { return res.statusCode < 400 }
-}));
 //////////////////////// Logging //////////////////////////
 
 //User APIs
@@ -70,10 +67,14 @@ app.post('/user/login', verifyUser.loginUser, bcryptMiddleware.checkIfHashed, bc
 	var password = res.locals.hash;
 
 	user.loginUser(email, password, function (err, token, result) {
+        // Error 401 resolved at comparePassword middleware
 		if (err) {
+            // Internal server error
+            errorLogger.error(`Failed login attempt for email: ${req.body.email}, Timestamp: ${new Date().toISOString()}`);
 			res.status(500);
 			res.send(err.statusCode);
 		} else {
+            auditLogger.info(`User with email: ${req.body.email} has logged in successfully, Timestamp: ${new Date().toISOString()}`);
 			res.statusCode = 201;
 			res.setHeader('Content-Type', 'application/json');
 			delete result[0]['password'];//clear the password in json data, do not send back to client
@@ -149,6 +150,7 @@ app.post('/listing/', verifyToken, function (req, res) {//Add Listing
 
     // Validate input fields for XSS
     if (xssRegex.test(data.title) || xssRegex.test(data.category) || xssRegex.test(data.description) || xssRegex.test(data.price)) {
+        errorLogger.error(`Invalid characters in input fields for selling items, User Id: ${req.id}, Timestamp: ${new Date().toISOString()}`);
         return res.status(400).json({ success: false, message: 'Invalid characters in input fields' });
     }
 
@@ -156,13 +158,14 @@ app.post('/listing/', verifyToken, function (req, res) {//Add Listing
     data.title = data.title.replace(/[^a-zA-Z0-9.,\s]/g, ''); // Only allows alphabets, numbers, commas, dots, and spaces
     data.category = data.category.replace(/[^a-zA-Z0-9.,\s]/g, ''); // Only allows alphabets, numbers, commas, dots, and spaces
     data.description = data.description.replace(/[^a-zA-Z0-9.,\s]/g, ''); // Only allows alphabets, numbers, commas, dots, and spaces
-    data.price = data.price.replace(/[^0-9.]/g, ''); // Only allows numbers and dots
 
 	listing.addListing(data, function (err, result) {
 		if (err) {
+            errorLogger.error(`Failed to add listing for User Id: ${req.id}, Timestamp: ${new Date().toISOString()}`);
 			res.status(500);
 			res.json({ success: false });
 		} else {
+            auditLogger.info(`User ID: ${req.id} has successfully added a listing, Timestamp: ${new Date().toISOString()}`);
 			res.status(201);
 			res.setHeader('Content-Type', 'application/json');
 			res.json({ success: true,id:result.insertId })
