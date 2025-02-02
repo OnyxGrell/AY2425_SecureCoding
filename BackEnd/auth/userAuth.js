@@ -32,7 +32,7 @@ module.exports.loginUser = (req, res, next) => {
         password: req.body.password
     };
 
-    console.log(data); 
+    // console.log(data); 
     
     if (!req.body.email || req.body.email == " ") {
         res.status(400).json({ message: "Error 400 Bad Request, Please provide a valid email" });
@@ -51,7 +51,7 @@ module.exports.loginUser = (req, res, next) => {
                 console.log('User not found!');
                 return res.status(403).json({message: 'User not found'});
             }else{
-                console.log(results)
+                // console.log(results)
                 res.locals.hash = results[0].password;
                 next();
             };

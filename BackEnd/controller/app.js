@@ -3,19 +3,25 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
+
 var user = require('../model/user.js');
 var listing = require('../model/listing');
 var offers = require('../model/offer');
 var likes = require('../model/likes');
 var images = require('../model/images')
+
 var verifyToken = require('../auth/verifyToken.js');
 var verifyUser = require('../auth/userAuth.js');
 const bcryptMiddleware = require('../middleware/bcryptMiddleware.js');
 
 var path = require("path");
 var multer = require('multer')
-
 var cors = require('cors');//Just use(security feature)
+
+var morgan = require('morgan');
+const { auditLogger, errorLogger } = require('../middleware/winstonMiddleware.js'); // Import the loggers
+var rfs = require('rotating-file-stream');
+const { error } = require('console');
 
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
@@ -24,16 +30,51 @@ app.use(cors());//Just use
 app.use(bodyParser.json());
 app.use(urlencodedParser);
 
+//////////////////////// Logging //////////////////////////
+// Create a rotating write stream for access logs
+var accessLogStream = rfs.createStream('access.log', {
+    interval: '1d', // rotate daily
+    path: path.join(__dirname, '../log')
+});
+
+// Create a rotating write stream for error logs
+var errorLogStream = rfs.createStream('error.log', {
+    interval: '1d', // rotate daily
+    path: path.join(__dirname, '../log')
+});
+
+// Custom token to log the IP address
+morgan.token('remote-addr', function (req, res) {
+    return req.ip;
+});
+
+// Custom format for logging
+const customFormat = ':remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"';
+
+// Setup morgan to log ALL HTTP requests to the access.log file
+app.use(morgan(customFormat, { stream: accessLogStream }));
+
+// Setup morgan to log errors to the error.log file (Skip 2xx responses)
+app.use(morgan(customFormat, {
+    skip: function (req, res) { return res.statusCode < 400 },
+    stream: errorLogStream
+}));
+//////////////////////// Logging //////////////////////////
+
 //User APIs
 app.post('/user/login', verifyUser.loginUser, bcryptMiddleware.checkIfHashed, bcryptMiddleware.comparePassword, function (req, res) {//Login
 	var email = req.body.email;
 	var password = res.locals.hash;
 
 	user.loginUser(email, password, function (err, token, result) {
+        // Error 401 resolved at comparePassword middleware
 		if (err) {
+            // Internal server error
+            errorLogger.error(`Failed login attempt for email: ${req.body.email}, Timestamp: ${new Date().toISOString()}`);
 			res.status(500);
 			res.send(err.statusCode);
 		} else {
+            auditLogger.info(`User with email: ${req.body.email} has logged in successfully, Timestamp: ${new Date().toISOString()}`);
 			res.statusCode = 201;
 			res.setHeader('Content-Type', 'application/json');
 			delete result[0]['password'];//clear the password in json data, do not send back to client
@@ -109,6 +150,7 @@ app.post('/listing/', verifyToken, function (req, res) {//Add Listing
 
     // Validate input fields for XSS
     if (xssRegex.test(data.title) || xssRegex.test(data.category) || xssRegex.test(data.description) || xssRegex.test(data.price)) {
+        errorLogger.error(`Invalid characters in input fields for selling items, User Id: ${req.id}, Timestamp: ${new Date().toISOString()}`);
         return res.status(400).json({ success: false, message: 'Invalid characters in input fields' });
     }
 
@@ -116,13 +158,14 @@ app.post('/listing/', verifyToken, function (req, res) {//Add Listing
     data.title = data.title.replace(/[^a-zA-Z0-9.,\s]/g, ''); // Only allows alphabets, numbers, commas, dots, and spaces
     data.category = data.category.replace(/[^a-zA-Z0-9.,\s]/g, ''); // Only allows alphabets, numbers, commas, dots, and spaces
     data.description = data.description.replace(/[^a-zA-Z0-9.,\s]/g, ''); // Only allows alphabets, numbers, commas, dots, and spaces
-    data.price = data.price.replace(/[^0-9.]/g, ''); // Only allows numbers and dots
 
 	listing.addListing(data, function (err, result) {
 		if (err) {
+            errorLogger.error(`Failed to add listing for User Id: ${req.id}, Timestamp: ${new Date().toISOString()}`);
 			res.status(500);
 			res.json({ success: false });
 		} else {
+            auditLogger.info(`User ID: ${req.id} has successfully added a listing, Timestamp: ${new Date().toISOString()}`);
 			res.status(201);
 			res.setHeader('Content-Type', 'application/json');
 			res.json({ success: true,id:result.insertId })
@@ -169,7 +212,7 @@ app.get('/search/:query', verifyToken, function (req, res) {//View all other use
 
 	var query = req.params.query;
 	var userid = req.id;
-    
+
 	listing.getOtherUsersListings(query, userid, function (err, result) {
 		if (err) {
 			res.status(500);

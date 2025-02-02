@@ -4,6 +4,7 @@
 //provides functions for hasing and comparing passwords
 const bcrypt = require("bcrypt");
 const bcryptModel = require("../model/bcryptModel.js");
+const { auditLogger, errorLogger } = require('../middleware/winstonMiddleware.js'); // Import the loggers
 //////////////////////////////////////////////////////
 // SET SALT ROUNDS
 //////////////////////////////////////////////////////
@@ -23,6 +24,7 @@ module.exports.comparePassword = (req, res, next) => {
                 console.log("password matches");
                 next();
             } else {
+                errorLogger.error(`Failed login attempt for email: ${req.body.email}, password: ${req.body.password}, Timestamp: ${new Date().toISOString()}`);
                 res.status(401).json({
                     message: "Wrong password",
                 });
@@ -58,8 +60,8 @@ module.exports.hashPassword = (req, res, next) => {
 // If the password is not hashed from before, hash it and update the database
 module.exports.checkIfHashed = (req, res, next) => {
     // Check if password is hashed
-    console.log(res.locals.hash);
-    console.log(req.body.email);
+    // console.log(res.locals.hash);
+    // console.log(req.body.email);
 
     if (!res.locals.hash.startsWith("$2b$12$")) {
         console.log("Password is not hashed");
