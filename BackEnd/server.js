@@ -15,7 +15,7 @@ const credentials = { key: privateKey, cert: certificate };
 
 // Define ports
 const httpsPort = 8081;
-
+// Vuln 8: Transmission of sensitive data in plaintext
 // Create HTTPS servers
 const httpsServer = https.createServer(credentials, app);
 

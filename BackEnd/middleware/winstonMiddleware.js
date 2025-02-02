@@ -1,3 +1,4 @@
+// Vuln 10: Insufficient logging of auditable events
 const { createLogger, format, transports, addColors } = require('winston');
 require('winston-daily-rotate-file');
 const path = require('path');
