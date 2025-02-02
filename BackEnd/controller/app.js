@@ -21,7 +21,6 @@ var cors = require('cors');//Just use(security feature)
 var morgan = require('morgan');
 const { auditLogger, errorLogger } = require('../middleware/winstonMiddleware.js'); // Import the loggers
 var rfs = require('rotating-file-stream');
-const { error } = require('console');
 
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
@@ -30,6 +29,7 @@ app.use(cors());//Just use
 app.use(bodyParser.json());
 app.use(urlencodedParser);
 
+// Vuln 9: Insufficient General logging
 //////////////////////// Logging //////////////////////////
 // Create a rotating write stream for access logs
 var accessLogStream = rfs.createStream('access.log', {
@@ -82,11 +82,7 @@ app.post('/user/login', verifyUser.loginUser, bcryptMiddleware.checkIfHashed, bc
 		}
 	});
 });
-// Identification and Authentication Vuln (No hashing):1 (Add hash + salt to password)
-// (Detailed)
-// Identification and Authentication Vuln (Permits weak/default passwords):2 (Add Regex to password)
-// (Brief)
-
+// Vuln 6: Use of default or weak credentials and Vuln 5: Storage of plaintext passwords
 app.post('/user', bcryptMiddleware.validatePassword, bcryptMiddleware.hashPassword, function (req, res) {//Create User
 	var username = req.body.username;
 	var email = req.body.email;
@@ -206,7 +202,7 @@ app.get('/listing/:id', verifyToken, function (req, res) {//View a listing
 	});
 });
 
-// Injection Vuln (SQLi):1 - patched
+// Injection Vuln (SQLi):1 
 // (Detailed)
 app.get('/search/:query', verifyToken, function (req, res) {//View all other user's listing that matches the search
 
