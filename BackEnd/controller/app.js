@@ -3,19 +3,23 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
+
 var user = require('../model/user.js');
 var listing = require('../model/listing');
 var offers = require('../model/offer');
 var likes = require('../model/likes');
 var images = require('../model/images')
+
 var verifyToken = require('../auth/verifyToken.js');
 var verifyUser = require('../auth/userAuth.js');
 const bcryptMiddleware = require('../middleware/bcryptMiddleware.js');
 
 var path = require("path");
 var multer = require('multer')
-
 var cors = require('cors');//Just use(security feature)
+
+var morgan = require('morgan');
+var rfs = require('rotating-file-stream');
 
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
@@ -23,6 +27,42 @@ app.options('*', cors());//Just use
 app.use(cors());//Just use
 app.use(bodyParser.json());
 app.use(urlencodedParser);
+
+//////////////////////// Logging //////////////////////////
+// Create a rotating write stream for access logs
+var accessLogStream = rfs.createStream('access.log', {
+    interval: '1d', // rotate daily
+    path: path.join(__dirname, '../log')
+});
+
+// Create a rotating write stream for error logs
+var errorLogStream = rfs.createStream('error.log', {
+    interval: '1d', // rotate daily
+    path: path.join(__dirname, '../log')
+});
+
+// Custom token to log the IP address
+morgan.token('remote-addr', function (req, res) {
+    return req.ip;
+});
+
+// Custom format for logging
+const customFormat = ':remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"';
+
+// Setup morgan to log ALL HTTP requests to the access.log file
+app.use(morgan(customFormat, { stream: accessLogStream }));
+
+// Setup morgan to log errors to the error.log file (Skip 2xx responses)
+app.use(morgan(customFormat, {
+    skip: function (req, res) { return res.statusCode < 400 },
+    stream: errorLogStream
+}));
+
+// Setup morgan to log errors to the console
+app.use(morgan(customFormat, {
+    skip: function (req, res) { return res.statusCode < 400 }
+}));
+//////////////////////// Logging //////////////////////////
 
 //User APIs
 app.post('/user/login', verifyUser.loginUser, bcryptMiddleware.checkIfHashed, bcryptMiddleware.comparePassword, function (req, res) {//Login
@@ -169,7 +209,7 @@ app.get('/search/:query', verifyToken, function (req, res) {//View all other use
 
 	var query = req.params.query;
 	var userid = req.id;
-    
+
 	listing.getOtherUsersListings(query, userid, function (err, result) {
 		if (err) {
 			res.status(500);
